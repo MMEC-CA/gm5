@@ -611,11 +611,10 @@ function updateCarP2(car, dt) {
   }
 
   // P2 fire gun — ShiftLeft, ControlLeft, Tab, F, Q, Backquote (`), C
-  const p2Firing = keys['ShiftLeft'] || keys['ControlLeft'] || keys['Tab'] ||
-                   keys['KeyF'] || keys['KeyQ'] || keys['Backquote'] || keys['KeyC'];
+  const p2Firing = keys['ShiftLeft'] || keys['ControlLeft'] || keys['KeyF'] || keys['KeyQ'] || keys['Backquote'] || keys['KeyC'];
   tryFire(car, p2Firing, dt);
-  // P2 oil — E, Digit1 (1), V
-  tryOil(car, keys['KeyE'] || keys['Digit1'] || keys['KeyV'], dt);
+  // P2 oil — E, Digit1 (1), V, Tab
+  tryOil(car, keys['KeyE'] || keys['Digit1'] || keys['KeyV'] || keys['Tab'], dt);
   updateBullets(car.bullets, dt);
 
   car.x += Math.cos(car.angle) * car.speed * dt;
