@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gm5",
+  "main": "./src/worker.js",
+  "compatibility_date": "2026-04-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  },
+  "routes": [
+    {
+      "pattern": "erd.mmec.ca/gm5/*",
+      "zone_name": "mmec.ca"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "SIGNALING_ROOM", "class_name": "SignalingRoom" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["SignalingRoom"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
