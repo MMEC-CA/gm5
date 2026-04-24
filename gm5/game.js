@@ -173,6 +173,7 @@ function onFlapUp() {
     slots[mySlotIndex].holding = false; slots[mySlotIndex].progress = 0;
     broadcast({ type: 'lobby-release', peerId: myPeerId });
   }
+  checkLobbyState();
 }
 function onFlapDownP2() {
   if (lobbyState !== 'lobby') return;
@@ -188,6 +189,7 @@ function onFlapUpP2() {
     slots[myP2SlotIndex].holding = false; slots[myP2SlotIndex].progress = 0;
     broadcast({ type: 'lobby-release', peerId: myP2PeerId });
   }
+  checkLobbyState();
 }
 function claimSlot() {
   for (let i = 0; i < MAX_SLOTS; i++) {
@@ -223,7 +225,8 @@ function updateHold(dt) {
   broadcast({ type: 'lobby-hold', peerId: myPeerId, progress });
   if (progress >= 100) {
     slots[mySlotIndex].ready = true; slots[mySlotIndex].holding = false; holdingFlap = false;
-    broadcast({ type: 'lobby-ready', peerId: myPeerId }); checkCountdownStart();
+    broadcast({ type: 'lobby-ready', peerId: myPeerId });
+    checkLobbyState();
   }
 }
 function updateHoldP2(dt) {
@@ -234,25 +237,24 @@ function updateHoldP2(dt) {
   broadcast({ type: 'lobby-hold', peerId: myP2PeerId, progress });
   if (progress >= 100) {
     slots[myP2SlotIndex].ready = true; slots[myP2SlotIndex].holding = false; holdingFlapP2 = false;
-    broadcast({ type: 'lobby-ready', peerId: myP2PeerId }); checkCountdownStart();
+    broadcast({ type: 'lobby-ready', peerId: myP2PeerId });
+    checkLobbyState();
   }
 }
-function checkCountdownStart() {
-  if (lobbyState !== 'lobby') return;
-  if (slots.some(s => s.ready)) {
-    lobbyState = 'countdown'; countdownTimer = COUNTDOWN_DURATION;
-    broadcast({ type: 'lobby-countdown' });
-  }
-}
-function updateCountdown(dt) {
-  if (lobbyState !== 'countdown') return;
-  if (slots.some(s => s.holding && !s.ready)) { countdownTimer = COUNTDOWN_DURATION; return; }
-  countdownTimer -= dt;
-  if (countdownTimer <= 0 && isHost) {
+function checkLobbyState() {
+  if (lobbyState !== 'lobby' || !isHost) return;
+  const hasReadyPlayers = slots.some(s => s.ready);
+  const isAnyoneHolding = slots.some(s => s.holding);
+  if (hasReadyPlayers && !isAnyoneHolding) {
     const playerSlots = [];
-    for (let i = 0; i < MAX_SLOTS; i++) if (slots[i].ready) playerSlots.push({ slotIndex: i, peerId: slots[i].peerId });
-    const msg = { type: 'game-start', playerSlots, hostPeerId: myPeerId };
-    broadcast(msg); startGame(msg);
+    for (let i = 0; i < MAX_SLOTS; i++) {
+      if (slots[i].ready) playerSlots.push({ slotIndex: i, peerId: slots[i].peerId });
+    }
+    if (playerSlots.length > 0) {
+      const msg = { type: 'game-start', playerSlots, hostPeerId: myPeerId };
+      broadcast(msg);
+      startGame(msg);
+    }
   }
 }
 
@@ -363,10 +365,11 @@ function handleMsg(from, data) {
       }
       break;
     case 'lobby-ready':
-      for (let i = 0; i < MAX_SLOTS; i++) { if (slots[i].peerId === data.peerId) { slots[i].ready = true; slots[i].holding = false; checkCountdownStart(); } }
+      for (let i = 0; i < MAX_SLOTS; i++) { if (slots[i].peerId === data.peerId) { slots[i].ready = true; slots[i].holding = false; checkLobbyState(); } }
       break;
     case 'lobby-release':
       for (let i = 0; i < MAX_SLOTS; i++) { if (slots[i].peerId === data.peerId) { slots[i].holding = false; slots[i].progress = 0; } }
+      checkLobbyState();
       break;
     case 'lobby-countdown':
       if (lobbyState === 'lobby') { lobbyState = 'countdown'; countdownTimer = COUNTDOWN_DURATION; }
