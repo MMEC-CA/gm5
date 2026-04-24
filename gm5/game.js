@@ -127,8 +127,8 @@ document.addEventListener('keydown', e => {
   }
   if (e.code === 'KeyW' && (lobbyState === 'lobby')) onFlapDownP2();
   if (e.code === 'Tab') e.preventDefault();
-  if ((e.code === 'Comma' || e.code === 'Period' || e.code === 'Enter' ||
-       e.code === 'BracketLeft' || e.code === 'BracketRight' || e.code === 'Backquote' ||
+  if ((e.code === 'Comma' || e.code === 'Period' || e.code === 'Enter' || e.code === 'Slash' ||
+       e.code === 'BracketLeft' || e.code === 'BracketRight' || e.code === 'Backquote' || e.code === 'KeyR' ||
        e.code === 'KeyC' || e.code === 'KeyV' || e.code === 'Digit1') && lobbyState === 'game') e.preventDefault();
 });
 document.addEventListener('keyup', e => {
@@ -610,8 +610,8 @@ function updateCarP2(car, dt) {
     if (dmg > 0.15) car.spinVel += (Math.random() - 0.5) * dmg * 5 * dt;
   }
 
-  // P2 fire gun — ShiftLeft, ControlLeft, Tab, F, Q, Backquote (`), C
-  const p2Firing = keys['ShiftLeft'] || keys['ControlLeft'] || keys['KeyF'] || keys['KeyQ'] || keys['Backquote'] || keys['KeyC'];
+  // P2 fire gun — ShiftLeft, ControlLeft, Tab, F, Q, R, Backquote (`), C
+  const p2Firing = keys['ShiftLeft'] || keys['ControlLeft'] || keys['KeyF'] || keys['KeyQ'] || keys['KeyR'] || keys['Backquote'] || keys['KeyC'] || keys['KeyR'];
   tryFire(car, p2Firing, dt);
   // P2 oil — E, Digit1 (1), V, Tab
   tryOil(car, keys['KeyE'] || keys['Digit1'] || keys['KeyV'] || keys['Tab'], dt);
