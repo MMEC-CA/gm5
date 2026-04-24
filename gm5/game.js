@@ -510,9 +510,9 @@ function updateCar(car, dt) {
   if (car.finished || !raceGo) return;
 
   const dmg = car.damage;
-  const accelMult = 1 - dmg * 0.50;
-  const turnMult  = 1 - dmg * 0.55;
-  const maxSpMult = 1 - dmg * 0.30;
+  const accelMult = 1 - dmg * 0.40; // Was 0.50
+  const turnMult  = 1 - dmg * 0.45; // Was 0.55
+  const maxSpMult = 1 - dmg * 0.25; // Was 0.30
 
   if (keys['ArrowUp']) {
     car.speed = Math.min(car.speed + ACCEL * accelMult * dt, MAX_SPEED * maxSpMult);
@@ -584,9 +584,9 @@ function updateCarP2(car, dt) {
   if (car.finished || !raceGo) return;
 
   const dmg = car.damage;
-  const accelMult = 1 - dmg * 0.50;
-  const turnMult  = 1 - dmg * 0.55;
-  const maxSpMult = 1 - dmg * 0.30;
+  const accelMult = 1 - dmg * 0.40; // Was 0.50
+  const turnMult  = 1 - dmg * 0.45; // Was 0.55
+  const maxSpMult = 1 - dmg * 0.25; // Was 0.30
 
   if (keys['KeyW']) {
     car.speed = Math.min(car.speed + ACCEL * accelMult * dt, MAX_SPEED * maxSpMult);
