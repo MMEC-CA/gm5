@@ -119,13 +119,13 @@ document.addEventListener('keydown', e => {
   if (e.repeat) return;
   if (e.code === 'Space') { e.preventDefault(); onFlapDown(); }
   if (e.code === 'ArrowUp') {
-    if (lobbyState === 'lobby' || lobbyState === 'countdown') { e.preventDefault(); onFlapDown(); }
+    if (lobbyState === 'lobby') { e.preventDefault(); onFlapDown(); }
     else if (lobbyState === 'game') e.preventDefault();
   }
   if (e.code === 'ArrowDown' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
     if (lobbyState === 'game') e.preventDefault();
   }
-  if (e.code === 'KeyW' && (lobbyState === 'lobby' || lobbyState === 'countdown')) onFlapDownP2();
+  if (e.code === 'KeyW' && (lobbyState === 'lobby')) onFlapDownP2();
   if (e.code === 'Tab') e.preventDefault();
   if ((e.code === 'Comma' || e.code === 'Period' || e.code === 'Enter' ||
        e.code === 'BracketLeft' || e.code === 'BracketRight' || e.code === 'Backquote' ||
@@ -325,7 +325,6 @@ function cleanupPeer(peerId) {
       slots[i] = { peerId: null, ready: false, progress: 0, holding: false };
   }
   updateHost();
-  if (lobbyState === 'countdown' && !slots.some(s => s.ready)) lobbyState = 'lobby';
 }
 function broadcast(msg) { const s = JSON.stringify(msg); dcs.forEach(dc => { if (dc.readyState === 'open') dc.send(s); }); }
 
@@ -343,7 +342,6 @@ function handleMsg(from, data) {
         }
         slots[s.index].peerId = s.peerId; slots[s.index].ready = s.ready; slots[s.index].progress = s.progress;
       });
-      if (data.lobbyState === 'countdown' && lobbyState === 'lobby') { lobbyState = 'countdown'; countdownTimer = data.countdownTimer ?? COUNTDOWN_DURATION; }
       updateHost();
       if (p1Yielded) claimSlot(); if (p2Yielded) claimSlotP2();
       break;
@@ -361,7 +359,7 @@ function handleMsg(from, data) {
       break;
     case 'lobby-hold':
       for (let i = 0; i < MAX_SLOTS; i++) {
-        if (slots[i].peerId === data.peerId) { slots[i].holding = true; slots[i].progress = data.progress; if (lobbyState === 'countdown' && !slots[i].ready) countdownTimer = COUNTDOWN_DURATION; }
+        if (slots[i].peerId === data.peerId) { slots[i].holding = true; slots[i].progress = data.progress; }
       }
       break;
     case 'lobby-ready':
@@ -370,9 +368,6 @@ function handleMsg(from, data) {
     case 'lobby-release':
       for (let i = 0; i < MAX_SLOTS; i++) { if (slots[i].peerId === data.peerId) { slots[i].holding = false; slots[i].progress = 0; } }
       checkLobbyState();
-      break;
-    case 'lobby-countdown':
-      if (lobbyState === 'lobby') { lobbyState = 'countdown'; countdownTimer = COUNTDOWN_DURATION; }
       break;
     case 'game-start':
       if (lobbyState !== 'game' && lobbyState !== 'finish') startGame(data);
@@ -499,7 +494,7 @@ function startGame(msg) {
   const myP2Entry = playerSlots.find(ps => ps.peerId === myP2PeerId);
   if (myP2Entry) myCarP2 = makeCar(myP2Entry.slotIndex, playerSlots.indexOf(myP2Entry));
   initAICars();
-  setTimeout(() => { raceGo = true; goFlashTimer = 1.2; }, 3000);
+  raceGo = true; goFlashTimer = 1.2;
 }
 
 // ============================================================
@@ -1276,13 +1271,6 @@ function drawLobby(dt) {
   }
   ctx.fillStyle = '#444'; ctx.font = '15px monospace';
   ctx.fillText('P1: ↑↓←→  •  P2: WASD  •  Race ' + TOTAL_LAPS + ' laps clockwise', GW/2, inY+60);
-
-  if (lobbyState === 'countdown') {
-    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0,0,GW,GH);
-    ctx.fillStyle = '#ffe030'; ctx.font = 'bold 140px monospace'; ctx.textAlign = 'center';
-    ctx.fillText(Math.ceil(countdownTimer), GW/2, GH/2+50);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 40px monospace'; ctx.fillText('GET READY!', GW/2, GH/2-50);
-  }
 }
 
 // ============================================================
@@ -1344,12 +1332,7 @@ function drawHUD() {
   ctx.fillStyle = '#ddd'; ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center';
   ctx.fillText(mins + ':' + secs, GW/2, 38);
 
-  if (elapsed < 3.0) {
-    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0,0,GW,GH);
-    ctx.fillStyle = '#ffe030'; ctx.font = 'bold 180px monospace'; ctx.textAlign = 'center';
-    ctx.fillText(Math.ceil(3.0 - elapsed), GW/2, GH/2+60);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 36px monospace'; ctx.fillText('RACE IN...', GW/2, GH/2-60);
-  } else if (goFlashTimer > 0) {
+  if (goFlashTimer > 0) {
     const alpha = Math.min(1, goFlashTimer);
     ctx.fillStyle = 'rgba(0,0,0,' + (alpha*0.4) + ')'; ctx.fillRect(0,0,GW,GH);
     ctx.globalAlpha = alpha; ctx.fillStyle = '#44ff88'; ctx.font = 'bold 200px monospace';
@@ -1511,8 +1494,8 @@ function loop(ts) {
   lastTime = ts;
   if (goFlashTimer > 0) goFlashTimer -= dt;
 
-  if (lobbyState === 'lobby' || lobbyState === 'countdown') {
-    updateHold(dt); updateHoldP2(dt); updateCountdown(dt); drawLobby(dt);
+  if (lobbyState === 'lobby') {
+    updateHold(dt); updateHoldP2(dt); drawLobby(dt);
   } else if (lobbyState === 'game') {
     if (myCar)   updateCar(myCar, dt);
     if (myCarP2) updateCarP2(myCarP2, dt);
