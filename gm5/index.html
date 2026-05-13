@@ -1,18 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-CA">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Grand Prix: Multiplayer Racing X</title>
+    <title>Alberta English PAT Prep: Flashcard Battle</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { width: 100%; height: 100%; overflow: hidden; background: #000; touch-action: none; }
+      html, body { 
+        width: 100%; 
+        height: 100%; 
+        overflow: hidden; 
+        background: #1a2a3a; 
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        touch-action: none; 
+      }
       canvas { display: block; }
+      #ui {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .hud {
+        position: absolute;
+        top: 20px;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        pointer-events: none;
+      }
+      .player-score {
+        padding: 10px 20px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 10px;
+        border: 2px solid #4488FF;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
     <canvas id="game"></canvas>
+    <div id="ui"></div>
     <script src="game.js"></script>
   </body>
 </html>
